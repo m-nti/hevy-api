@@ -28,6 +28,7 @@ Learnings from previous runs — read these to go faster:
 - **`POST /v1/routines` returns `{"routine": [ { ... } ]}`** — the routine is wrapped in an array. Check for the `id` and `title` in the response to confirm success.
 - **Pagination:** exercise templates are ~6 pages at `pageSize=100` (~513 templates). Requesting a page beyond the last returns `{"error":"Page not found"}` — stop when you hit it. Fetch all pages once and grep locally rather than re-querying per exercise.
 - **Fetch templates once, match locally.** Dump all pages to files and search with a small Python script (matching by keyword) — much faster than one request per exercise. Watch for duplicate IDs across pages; dedupe by `id`.
+- **The template list already includes custom exercises** (`is_custom: true`). No separate endpoint is needed to see them — search the same list and reuse an existing custom exercise before creating a new one to avoid duplicates.
 - **Weight ranges:** the API takes a single `weight_kg` per set. For a range like "10-15 kg", pick a sensible point in the range (mid or low end for low-RPE days) and note the full range in `notes`.
 - **Set field by exercise type:** `weight_reps` → `weight_kg` + `reps`; `reps_only`/bodyweight → `reps` only (omit `weight_kg`); `duration` (e.g. Dead Hang, Plank) → `duration_seconds`.
 
@@ -36,7 +37,7 @@ Learnings from previous runs — read these to go faster:
 When the user provides a workout screenshot:
 
 1. **Read the screenshot** — extract exercise names, sets, reps, weight, and rest times.
-2. **Match exercises to templates** — search the user's exercise templates via `GET /v1/exercise_templates?page=1&pageSize=100` (paginate through all pages). Find the best match for each exercise name.
+2. **Match exercises to templates** — search the user's exercise templates via `GET /v1/exercise_templates?page=1&pageSize=100` (paginate through all pages). Find the best match for each exercise name. This list includes the user's **custom exercises** too (`is_custom: true`) — always search these as well and reuse an existing custom exercise instead of creating a duplicate.
 3. **Handle name mismatches** — different sources call exercises by different names. Use your knowledge to map them:
    - "Flat Bench" → "Bench Press (Barbell)"
    - "DB Rows" → "Dumbbell Row"
@@ -46,7 +47,7 @@ When the user provides a workout screenshot:
    - "RDL" → "Romanian Deadlift (Barbell)"
    - "Leg Curl" → "Seated Leg Curl (Machine)"
    - Think about what exercise is likely meant based on context, equipment mentioned, and common gym terminology.
-4. **If no confident match exists** — create a custom exercise via `POST /v1/exercise_templates`. Always fill the secondary muscle groups (`other_muscles`) — never leave it empty:
+4. **If no confident match exists** (including no matching custom exercise from step 2) — create a custom exercise via `POST /v1/exercise_templates`. Always fill the secondary muscle groups (`other_muscles`) — never leave it empty:
    ```json
    {
      "exercise": {
