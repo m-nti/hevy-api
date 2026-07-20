@@ -18,6 +18,19 @@ Authentication: pass the API key from `.env` (`hevy_API`) as a header:
 api-key: <value from .env>
 ```
 
+## Implementation Notes & Gotchas
+
+Learnings from previous runs — read these to go faster:
+
+- **RPE is not supported on routine sets.** `PostRoutinesRequestSet` has no `rpe` field (only workout sets do). Put any RPE targets from the screenshot into the exercise `notes` field instead (e.g. `"RPE 5-6 | 10-15 kg. ..."`). Do not send `rpe` in a routine POST.
+- **Don't use shell heredocs for JSON payloads.** They fail intermittently in this environment. Instead, write the JSON to a file (e.g. `/tmp/routine.json`) with the file-writing tool, then `curl ... -d @/tmp/routine.json`. Same for the custom-exercise payload — inline `-d '{...}'` with single quotes is fine for short bodies.
+- **`POST /v1/exercise_templates` returns just the new exercise's ID as a bare string** (a UUID like `513523cc-...`), not a JSON object. Capture that string directly and use it as the `exercise_template_id`.
+- **`POST /v1/routines` returns `{"routine": [ { ... } ]}`** — the routine is wrapped in an array. Check for the `id` and `title` in the response to confirm success.
+- **Pagination:** exercise templates are ~6 pages at `pageSize=100` (~513 templates). Requesting a page beyond the last returns `{"error":"Page not found"}` — stop when you hit it. Fetch all pages once and grep locally rather than re-querying per exercise.
+- **Fetch templates once, match locally.** Dump all pages to files and search with a small Python script (matching by keyword) — much faster than one request per exercise. Watch for duplicate IDs across pages; dedupe by `id`.
+- **Weight ranges:** the API takes a single `weight_kg` per set. For a range like "10-15 kg", pick a sensible point in the range (mid or low end for low-RPE days) and note the full range in `notes`.
+- **Set field by exercise type:** `weight_reps` → `weight_kg` + `reps`; `reps_only`/bodyweight → `reps` only (omit `weight_kg`); `duration` (e.g. Dead Hang, Plank) → `duration_seconds`.
+
 ## Core Workflow
 
 When the user provides a workout screenshot:
@@ -96,6 +109,20 @@ Always capture any descriptive text from the screenshot rather than dropping it:
 - **Routine-level description** → the routine's `notes` field. Use this for the overall workout description, focus, or general instructions shown in the screenshot.
 - **Per-exercise description** → that exercise's `notes` field. Use this for form cues, tempo, RPE targets, or any note attached to a specific exercise.
 - If the screenshot has no descriptive text, leave `notes` as an empty string `""`.
+
+## Rest Times
+
+If the screenshot specifies rest times, use them. Otherwise set `rest_seconds` based on how systemically fatiguing the exercise is:
+
+| Exercise type | `rest_seconds` |
+|---------------|----------------|
+| Heavy compound / high systemic fatigue (squats, deadlifts, barbell rows, overhead press, heavy leg press, RDLs) | 180 (2.5–3 min) |
+| Moderate compound (bench, dumbbell press, pull-ups, lunges, hip thrusts) | 120 (2 min) |
+| "Normal" accessory / isolation (curls, triceps, lateral raises, face pulls, cable/machine work) | 70–90 |
+| Core / duration / stretch-style holds (plank, dead hang) | 45–60 |
+
+- Scale toward the higher end of a band for heavier loads / lower reps, and the lower end for lighter, higher-rep or low-RPE work.
+- The idea: bigger multi-joint lifts that tax the whole system need longer recovery; small single-joint moves need less.
 
 ## Warm-Up Sets
 
@@ -178,7 +205,7 @@ Use `rep_range` when the screenshot shows a range (e.g. "8-12 reps"). Use `reps`
 - Paginate through ALL pages when searching for exercises or folders — don't stop at page 1.
 - Weights in the API are always in **kilograms**. Convert from lbs if the screenshot uses pounds (divide by 2.205).
 - If the screenshot doesn't specify weight, leave `weight_kg` as `null`.
-- If the screenshot doesn't specify rest, default to `rest_seconds: 90`.
+- If the screenshot doesn't specify rest, set `rest_seconds` by exercise type (see "Rest Times"): ~180s for heavy compounds, ~120s for moderate compounds, 70–90s for normal accessory/isolation work, 45–60s for core/duration holds.
 - `superset_id` should be `null` unless the screenshot explicitly groups exercises as a superset. If it does, give supersetted exercises the same integer `superset_id`.
 - The routine title should match what's shown in the screenshot, with the date appended as ` - YYYY-MM-DD`. If no name is shown, derive a sensible one from the workout content (e.g. "Upper Body A", "Push Day").
 - Always append the respective date to the routine title (date from the screenshot, or today's date if absent).
