@@ -29,6 +29,7 @@ Learnings from previous runs — read these to go faster:
 - **Pagination:** exercise templates are ~6 pages at `pageSize=100` (~513 templates). Requesting a page beyond the last returns `{"error":"Page not found"}` — stop when you hit it. Fetch all pages once and grep locally rather than re-querying per exercise.
 - **Fetch templates once, match locally.** Dump all pages to files and search with a small Python script (matching by keyword) — much faster than one request per exercise. Watch for duplicate IDs across pages; dedupe by `id`.
 - **The template list already includes custom exercises** (`is_custom: true`). No separate endpoint is needed to see them — search the same list and reuse an existing custom exercise before creating a new one to avoid duplicates.
+- **Check `EXERCISE-REGISTRY.md` before fetching templates.** It caches common exercise IDs and skips the ~6-page fetch. Treat it as a cache, not truth: if an ID fails, re-verify against the API and update the registry (with its provenance date).
 - **Weight ranges:** the API takes a single `weight_kg` per set. For a range like "10-15 kg", pick a sensible point in the range (mid or low end for low-RPE days) and note the full range in `notes`.
 - **Set field by exercise type:** `weight_reps` → `weight_kg` + `reps`; `reps_only`/bodyweight → `reps` only (omit `weight_kg`); `duration` (e.g. Dead Hang, Plank) → `duration_seconds`.
 
@@ -37,7 +38,9 @@ Learnings from previous runs — read these to go faster:
 When the user provides a workout screenshot:
 
 1. **Read the screenshot** — extract exercise names, sets, reps, weight, and rest times.
-2. **Match exercises to templates** — search the user's exercise templates via `GET /v1/exercise_templates?page=1&pageSize=100` (paginate through all pages). Find the best match for each exercise name. This list includes the user's **custom exercises** too (`is_custom: true`) — always search these as well and reuse an existing custom exercise instead of creating a duplicate.
+2. **Match exercises to templates** — check [`EXERCISE-REGISTRY.md`](./EXERCISE-REGISTRY.md) **first**: it's a cached list of common exercise → `exercise_template_id` mappings and is much faster than hitting the API. Use a registry ID directly when there's a confident name match. Only if an exercise isn't in the registry, fall back to `GET /v1/exercise_templates?page=1&pageSize=100` (paginate through all pages) and match locally. That API list includes the user's **custom exercises** too (`is_custom: true`) — always search these as well and reuse an existing custom exercise instead of creating a duplicate. When you match a common exercise via the API that wasn't in the registry, add it to `EXERCISE-REGISTRY.md` for next time.
+
+   - **If a registry ID fails** (a routine/exercise `POST` errors with "exercise template not found" or a 400 referencing the template), the ID may have changed. Re-fetch from the API, find the current ID by title, update `EXERCISE-REGISTRY.md` (and its provenance date), then retry. The API is authoritative; the registry is only a cache.
 3. **Handle name mismatches** — different sources call exercises by different names. Use your knowledge to map them:
    - "Flat Bench" → "Bench Press (Barbell)"
    - "DB Rows" → "Dumbbell Row"

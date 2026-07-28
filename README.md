@@ -17,6 +17,8 @@ Drop in a screenshot of a workout and an agent reads the exercises, sets, reps, 
 
 ## Usage
 
+[`EXERCISE-REGISTRY.md`](./EXERCISE-REGISTRY.md) caches common exercise → template-ID mappings so matching is fast and doesn't always hit the API.
+
 The agent workflow, conventions, and API reference live in [`AGENTS.md`](./AGENTS.md). It covers:
 
 - Matching screenshot exercises to Hevy templates (including fuzzy name mapping)
