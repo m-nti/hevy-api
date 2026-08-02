@@ -68,7 +68,7 @@ When the user provides a workout screenshot:
    POST /v1/routine_folders
    { "routine_folder": { "title": "Cyclete" } }
    ```
-6. **Create the routine** in that folder via `POST /v1/routines`. Append the date to the title (see "Date Handling" below) and carry over any descriptions/notes from the screenshot into the `notes` fields:
+6. **Create the routine** in that folder via `POST /v1/routines`. Optionally append the date to the title (see "Date Handling" below — the date is optional and, if used, must be a freshly computed value, never a copied literal) and carry over any descriptions/notes from the screenshot into the `notes` fields:
    ```json
    {
      "routine": {
@@ -95,16 +95,16 @@ When the user provides a workout screenshot:
 
 ## Date Handling
 
-Always append the date to the routine title when creating it, in `YYYY-MM-DD` format:
+Appending a date to the routine title is **optional**. If you do append one, use `YYYY-MM-DD` format:
 
 ```
 <Routine Name> - <YYYY-MM-DD>
 ```
 
-Examples: `Push Day - 2026-07-20`, `Upper Body A - 2026-07-20`.
-
-- Use the date shown in the screenshot if one is present (this is the "respective date" for that workout).
-- If the screenshot has no date, use today's date. Get it with `date +%Y-%m-%d` in the shell.
+- **The date is optional** — it's fine to create a routine with just `<Routine Name>` and no date. Omit it when the user asks for no date, or when a bare title reads better.
+- **Never hard-code or copy a literal date.** Do not reuse a date from an example in this file or from a previously created routine. If two routines end up with the same date because they were genuinely created on the same day, that's correct — but the date must always come from an actual lookup, not a copied string.
+- **Always compute the current date at creation time** with `date +%Y-%m-%d` in the shell. Run it fresh for each routine; do not assume it's still whatever a prior command returned.
+- **Prefer the date shown in the screenshot** if one is present (that's the "respective date" for that workout). Otherwise use the freshly-computed current date, or omit the date entirely.
 
 ## Descriptions & Notes
 
@@ -211,8 +211,8 @@ Use `rep_range` when the screenshot shows a range (e.g. "8-12 reps"). Use `reps`
 - If the screenshot doesn't specify weight, leave `weight_kg` as `null`.
 - If the screenshot doesn't specify rest, set `rest_seconds` by exercise type (see "Rest Times"): ~180s for heavy compounds, ~120s for moderate compounds, 70–90s for normal accessory/isolation work, 45–60s for core/duration holds.
 - `superset_id` should be `null` unless the screenshot explicitly groups exercises as a superset. If it does, give supersetted exercises the same integer `superset_id`.
-- The routine title should match what's shown in the screenshot, with the date appended as ` - YYYY-MM-DD`. If no name is shown, derive a sensible one from the workout content (e.g. "Upper Body A", "Push Day").
-- Always append the respective date to the routine title (date from the screenshot, or today's date if absent).
+- The routine title should match what's shown in the screenshot. If no name is shown, derive a sensible one from the workout content (e.g. "Upper Body A", "Push Day").
+- Appending ` - YYYY-MM-DD` to the title is optional (see "Date Handling"). If used, the date must be freshly computed via `date +%Y-%m-%d` (or taken from the screenshot) — never a copied or hard-coded literal.
 - Always carry descriptions/notes from the screenshot into the routine `notes` (overall) and per-exercise `notes` (specific) fields.
 - When in doubt about an exercise match, prefer creating a custom exercise over using a wrong template.
 - When creating a custom exercise, always populate the secondary muscle groups (`other_muscles`) with the relevant secondary muscles — do not leave it empty.

@@ -95,6 +95,7 @@ This registry is a cache, not the source of truth. The API is authoritative; whe
 | Rear Delt Reverse Fly (Cable) | `C315DC2A` | weight_reps |
 | Rear Delt Reverse Fly (Dumbbell) | `E5988A0A` | weight_reps |
 | Rear Delt Reverse Fly (Machine) | `D8281C62` | weight_reps |
+| Band Pullaparts | `E8D86EE8` | reps_only |
 
 ## Biceps
 
@@ -207,6 +208,7 @@ This registry is a cache, not the source of truth. The API is authoritative; whe
 |----------|----|------|
 | Dead Hang | `B9380898` | duration |
 | Rowing Machine | `0222DB42` | distance_duration |
+| Farmers Walk | `50C613D0` | short_distance_weight |
 
 ## Custom exercises (this account)
 
