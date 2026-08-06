@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 874" width="860" height="874" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title>How HevyHelper works: a screenshot in, a recovery-gated, history-based Hevy routine out.</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e1220"/>
+      <stop offset="1" stop-color="#0a0d16"/>
+    </linearGradient>
+    <marker id="arw" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#98a2b6"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="860" height="874" rx="22" fill="url(#bg)"/>
+
+  <!-- connectors -->
+  <g stroke="#98a2b6" stroke-width="2" fill="none">
+    <path d="M430,90 L430,112" marker-end="url(#arw)"/>
+    <path d="M430,182 L430,204" marker-end="url(#arw)"/>
+    <path d="M430,274 L430,296" marker-end="url(#arw)"/>
+    <path d="M430,366 L430,379" marker-end="url(#arw)"/>
+    <path d="M430,478 L166,542" marker-end="url(#arw)"/>
+    <path d="M430,478 L430,542" marker-end="url(#arw)"/>
+    <path d="M430,478 L694,542" marker-end="url(#arw)"/>
+    <path d="M158,617 L344,678" marker-end="url(#arw)"/>
+    <path d="M430,617 L430,678" marker-end="url(#arw)"/>
+    <path d="M702,617 L516,678" marker-end="url(#arw)"/>
+    <path d="M430,746 L430,783" marker-end="url(#arw)"/>
+  </g>
+
+  <!-- A: input -->
+  <rect x="200" y="24" width="460" height="64" rx="14" fill="#1e2a4a" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="430" y="50" text-anchor="middle" font-size="15" font-weight="600" fill="#e7ebf3">📸 Screenshot — Bevel or any health app</text>
+  <text x="430" y="69" text-anchor="middle" font-size="11.5" fill="#b9c0d0">prescribed workout + recovery sitrep</text>
+
+  <!-- B -->
+  <rect x="200" y="116" width="460" height="64" rx="14" fill="#111827" stroke="#3f4658" stroke-width="1.5"/>
+  <text x="430" y="142" text-anchor="middle" font-size="15" font-weight="600" fill="#e5e7eb">Read exercises, sets, rest, notes</text>
+  <text x="430" y="161" text-anchor="middle" font-size="11.5" fill="#9aa4b8">+ today's recovery %</text>
+
+  <!-- C -->
+  <rect x="200" y="208" width="460" height="64" rx="14" fill="#111827" stroke="#3f4658" stroke-width="1.5"/>
+  <text x="430" y="234" text-anchor="middle" font-size="15" font-weight="600" fill="#e5e7eb">Match to Hevy templates</text>
+  <text x="430" y="253" text-anchor="middle" font-size="11.5" fill="#9aa4b8">+ wrist-safe swaps</text>
+
+  <!-- D -->
+  <rect x="200" y="300" width="460" height="64" rx="14" fill="#111827" stroke="#3f4658" stroke-width="1.5"/>
+  <text x="430" y="326" text-anchor="middle" font-size="15" font-weight="600" fill="#e5e7eb">Pull training history</text>
+  <text x="430" y="345" text-anchor="middle" font-size="11.5" fill="#9aa4b8">estimate capacity · last ~120 days</text>
+
+  <!-- E: recovery gate (diamond) -->
+  <polygon points="430,382 528,430 430,478 332,430" fill="#3b2f66" stroke="#a78bfa" stroke-width="2"/>
+  <text x="430" y="435" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">🔋 Recovery gate</text>
+
+  <!-- branch labels -->
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <rect x="238" y="497" width="56" height="22" rx="11" fill="#0d1117" stroke="#34d399" stroke-width="1.2"/>
+    <text x="266" y="512" fill="#6ee7b7">70%+</text>
+    <rect x="398" y="497" width="64" height="22" rx="11" fill="#0d1117" stroke="#fbbf24" stroke-width="1.2"/>
+    <text x="430" y="512" fill="#fde68a">50–70%</text>
+    <rect x="566" y="497" width="58" height="22" rx="11" fill="#0d1117" stroke="#f87171" stroke-width="1.2"/>
+    <text x="595" y="512" fill="#fecaca">&lt;50%</text>
+  </g>
+
+  <!-- F: high intensity -->
+  <rect x="40" y="545" width="236" height="72" rx="12" fill="#0f3d2e" stroke="#34d399" stroke-width="2"/>
+  <text x="158" y="576" text-anchor="middle" font-size="14" font-weight="600" fill="#d1fae5">Progressive overload</text>
+  <text x="158" y="595" text-anchor="middle" font-size="11" fill="#8fd9b8">double progression + RPE / failure</text>
+
+  <!-- G: maintain -->
+  <rect x="312" y="545" width="236" height="72" rx="12" fill="#3a3416" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="430" y="586" text-anchor="middle" font-size="14" font-weight="600" fill="#fde68a">Hold at capacity</text>
+
+  <!-- H: reduce -->
+  <rect x="584" y="545" width="236" height="72" rx="12" fill="#3f1d1d" stroke="#f87171" stroke-width="1.5"/>
+  <text x="702" y="586" text-anchor="middle" font-size="14" font-weight="600" fill="#fecaca">Scale load down</text>
+
+  <!-- I -->
+  <rect x="200" y="682" width="460" height="64" rx="14" fill="#111827" stroke="#3f4658" stroke-width="1.5"/>
+  <text x="430" y="708" text-anchor="middle" font-size="15" font-weight="600" fill="#e5e7eb">Pre-fill weights &amp; rep ranges</text>
+  <text x="430" y="727" text-anchor="middle" font-size="11.5" fill="#9aa4b8">warm-up ramps · rest · notes</text>
+
+  <!-- J: output -->
+  <rect x="200" y="786" width="460" height="64" rx="14" fill="#132e1e" stroke="#22c55e" stroke-width="2"/>
+  <text x="430" y="823" text-anchor="middle" font-size="15" font-weight="700" fill="#dcfce7">✅ Routine created in Hevy · Cyclete folder</text>
+</svg>

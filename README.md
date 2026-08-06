@@ -26,6 +26,13 @@ Both live in the screenshot, so one paste carries the plan *and* the readiness. 
 
 From there it's automatic:
 
+<p align="center">
+  <img src="assets/flow.svg" alt="How HevyHelper works: a screenshot in, a recovery-gated, history-based Hevy routine out" width="820">
+</p>
+
+<details>
+<summary>Mermaid source (renders on the GitHub website)</summary>
+
 ```mermaid
 flowchart TD
     A["📸 Screenshot — Bevel or any health app<br/>(prescribed workout + recovery sitrep)"]:::input
@@ -49,6 +56,8 @@ flowchart TD
     classDef low fill:#3f1d1d,stroke:#f87171,stroke-width:1px,color:#fecaca;
     classDef output fill:#132e1e,stroke:#22c55e,stroke-width:2px,color:#dcfce7;
 ```
+
+</details>
 
 ### Example
 
