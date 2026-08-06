@@ -4,6 +4,8 @@ Cached Hevy `exercise_template_id` values for common exercises, so matching a sc
 
 **Provenance:** All IDs below were verified live from this account's `GET /v1/exercise_templates` on **2026-07-20**. Standard (non-custom) IDs are Hevy's global template IDs; custom IDs are specific to this account.
 
+> ⚠️ **Wrist-safe constraint (ulnar):** the user cannot do straight-barbell / locked-wrist presses. The barbell bench and barbell overhead-press entries below are listed for completeness but should be **swapped** for the neutral-grip dumbbell / machine / cable equivalent. See `AGENTS.md` → "Athlete Constraints — Wrist-Safe".
+
 ## How to use this registry
 
 1. **Look here first.** When matching a screenshot exercise, check this file before fetching the API. It covers the common lifts and is much faster.
