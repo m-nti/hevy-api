@@ -46,7 +46,9 @@ api-key: <value from .env>
 
 Learnings from previous runs — read these to go faster:
 
-- **RPE is not supported on routine sets.** `PostRoutinesRequestSet` has no `rpe` field (only workout sets do). Put any RPE targets from the screenshot into the exercise `notes` field instead (e.g. `"RPE 5-6 | 10-15 kg. ..."`). Do not send `rpe` in a routine POST.
+- **RPE is not supported on routine sets.** `PostRoutinesRequestSet` has no `rpe` field (only workout sets do). Put any RPE targets from the screenshot into the exercise `notes` field instead (e.g. `"RPE 6-7 | 10-15 kg. ..."`). Do not send `rpe` in a routine POST.
+- **Hevy's RPE scale bottoms out at 6.** The API enum is `[6, 7, 7.5, 8, 8.5, 9, 9.5, 10]` — there is no RPE 5. When a screenshot prescribes RPE 5-6 (or lower), **clamp the stated goal to RPE 6-7** in the notes and target the load accordingly. Never write "RPE 5" as a target.
+- **Supersets cannot be set via the routines API.** `superset_id` is accepted without error on both `POST` and `PUT /v1/routines` but is **silently stored as `null`** (verified 2026-08-10: sent `1,1,2,2,3,3,4,4`, read back all `null`; Hevy's own GPT spec constrains it to `enum: [null]`). Convey supersets by (a) **ordering** paired exercises adjacently, (b) setting `rest_seconds: 0` on the first of the pair and the real rest on the second, and (c) naming the superset in each exercise's `notes`. The user groups them in the app if they want the visual link.
 - **Don't use shell heredocs for JSON payloads.** They fail intermittently in this environment. Instead, write the JSON to a file (e.g. `/tmp/routine.json`) with the file-writing tool, then `curl ... -d @/tmp/routine.json`. Same for the custom-exercise payload — inline `-d '{...}'` with single quotes is fine for short bodies.
 - **`POST /v1/exercise_templates` returns just the new exercise's ID as a bare string** (a UUID like `513523cc-...`), not a JSON object. Capture that string directly and use it as the `exercise_template_id`.
 - **`POST /v1/routines` returns `{"routine": [ { ... } ]}`** — the routine is wrapped in an array. Check for the `id` and `title` in the response to confirm success.
@@ -180,17 +182,17 @@ This is the **single source of truth** for pre-filling working-set `weight_kg` w
 
 The user states today's **recovery context** per request (e.g. "100%, recovery good", or "deload / 50%"). Map it to a factor and a tier:
 
-- **Recovery factor:** `R = clamp(stated_percent / 100, 0.5, 1.0)`. Default `R = 1.0` when described as good/normal with no number. The 0.5 floor keeps a bad day from producing an absurd cut.
-- **Tiers (exact, half-open boundaries):**
+- **Tiers (exact, half-open boundaries).** The tier sets the **RPE target**; the RPE target then sets the load (step 9). RPE targets are clamped to Hevy's floor of **6**.
 
-| Recovery `pct` | Tier | Baseline weight | Progression (load step) | Rep targets |
-|----------------|------|-----------------|-------------------------|-------------|
-| `pct > 70` | **High intensity** | `capacity` | **Applied** if earned (see Progressive Overload) — only tier that adds load | Full range `[low, high]` |
-| `50 ≤ pct ≤ 70` | **Maintain** | `capacity` | None (hold) | `rep_range {low, mid}`, `mid = floor((low+high)/2)` |
-| `pct < 50` | **Reduce** | `capacity × R` | None | Fixed `reps = low` |
+| Recovery `pct` | Tier | RPE target | Load haircut | Progression (load step) | Rep targets |
+|----------------|------|-----------|--------------|-------------------------|-------------|
+| `pct > 70` | **High intensity** | RPE 8–9 | `× 1.0` | **Applied** if earned (see Progressive Overload) — only tier that adds load | Full range `[low, high]` |
+| `50 ≤ pct ≤ 70` | **Maintain** | RPE 7–8 | `× 0.95` | None (hold) | `rep_range {low, mid}`, `mid = floor((low+high)/2)` |
+| `pct < 50` | **Reduce** | **RPE 6–7** | `× 0.85` | None | Fixed `reps = low` (or the screenshot's explicit reps) |
 
-- Exactly **70 → Maintain**; exactly **50 → Maintain**. `R` is applied to the weight **only in the Reduce tier**; in High/Maintain treat the weight multiplier as `1.0` (the tier itself, not `R`, sets behavior).
-- A **user-requested "deload"** (the word, no number) is a **fixed ~10% cut** (`baseline = capacity × 0.9`, reps → lower half), independent of the recovery %. This is distinct from the `<50%` Reduce tier (which is for a genuinely stated low recovery number).
+- Exactly **70 → Maintain**; exactly **50 → Maintain**.
+- A **user-requested "deload"** (the word, no number) uses the **Reduce** row (RPE 6–7, `× 0.85`), independent of any recovery %.
+- There is deliberately **no `capacity × R` load formula** — a linear load cut collapses to absurd weights at low recovery (see step 9). The RPE target plus the mild haircut is what scales the day.
 
 ### Capacity estimation algorithm (per exercise)
 
@@ -202,10 +204,15 @@ The user states today's **recovery context** per request (e.g. "100%, recovery g
 6. **Spike guard (precise):** let the distinct working weights sorted descending be `w1 > w2 > w3 …`. If `w1` was logged in **only one set** and `w1 > 1.5 × w2`, discard all sets at `w1` and repeat the check once on the new top. If there are fewer than 2 distinct working weights, do no spike removal. (Multi-set anomalies are intentionally not removed — the 120-day window is the primary guard.)
 7. **Rep-floor preference (avoid a heavy low-rep single dominating a high-rep target):** near-max `capacity` = the highest remaining `weight_kg` among working sets whose logged `reps ≥ low` (the bottom of today's target range). Only if no in-block set meets that rep floor, fall back to the overall highest remaining weight and note the rep mismatch in `notes`.
 8. **Decline guard (detect a genuine downtrend):** if the **most recent two** in-block working sessions are **both** below the computed near-max by more than one increment, treat the near-max as stale — set `capacity` = the most-recent session's working weight and note the downgrade. (A single low session is still ignored; that's the whole point of near-max.)
-9. **Compute the target** using the recovery tier:
-   - a. **Baseline:** High/Maintain → `baseline = capacity`; Reduce → `baseline = capacity × R`; user-requested deload → `baseline = capacity × 0.9`.
-   - b. **Earned step:** only in the High tier, add the Progressive-Overload load step **if earned** (else add nothing). Never add a step in Maintain/Reduce/deload.
-   - c. **Round:** floor to the equipment increment (see below).
+9. **Compute the target from the RPE goal, not by scaling capacity by `R`.** Scaling load directly by `R` badly undershoots on a low-recovery day: at 24% recovery (`R = 0.5`) it produced a **6 kg** incline press and **2 kg** shoulder press — roughly RPE 3, not a training stimulus. Recovery should set the *RPE target*, and the RPE target sets the load:
+   - a. **Recovery → RPE target** (clamped to Hevy's floor of 6): High → RPE 8–9; Maintain → RPE 7–8; Reduce / user-requested deload → **RPE 6–7**.
+   - b. **Solve for the load at that RPE**, anchored on a logged set — prefer a block set that has a **logged `rpe`** over assuming one. With `RIR = 10 − RPE`: `est1RM = w × (1 + (reps + RIR) / 30)`, then `load = est1RM / (1 + (target_reps + target_RIR) / 30)`.
+   - c. **Cap at the observed block max** — a reduced-intensity day must never prescribe more than the athlete has actually lifted in the block.
+   - d. **Recovery haircut** for depressed capacity on the day: Reduce `× 0.85`, Maintain `× 0.95`, High `× 1.0`. This is the *only* place recovery scales load, and it is deliberately mild.
+   - e. **Earned step:** only in the High tier, add the Progressive-Overload load step **if earned**. Never add a step in Maintain/Reduce/deload.
+   - f. **Round:** floor to the equipment increment (see below).
+
+   Worked example (2026-08-10, 24% recovery → RPE 6–7 at 12 reps): incline DB press anchored on `15 kg × 15 @ RPE 8.5` → est 1RM 23.2 kg → RPE-6.5 load 15.3 kg → capped to 15 → `× 0.85` → **12 kg**. The naive `× 0.5` gave 6 kg.
 10. **No history / no working sets in block** → leave `weight_kg: null` and note "no history — pick to RPE". Don't invent a number.
 11. **Note provenance** in the exercise `notes`, e.g. `"Block near-max 45 kg (2026-07-25); recovery 100% (high) -> target 45 kg"`.
 
