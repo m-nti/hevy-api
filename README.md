@@ -107,8 +107,6 @@ Alongside those, every routine also matches each exercise to a Hevy template (ch
 | File | Purpose |
 |------|---------|
 | [`AGENTS.md`](./AGENTS.md) | The operational agent spec — full workflow, algorithms, conventions, and API/schema reference. |
-| [`AGENTS-enhanced.md`](./AGENTS-enhanced.md) | Audited, hardened revision of the spec (contradictions resolved, algorithms made deterministic). Promotion candidate for `AGENTS.md`. |
-| [`AGENTS-AUDIT.md`](./AGENTS-AUDIT.md) | The audit that produced the enhanced revision — findings by priority and the fix applied for each. |
 | [`EXERCISE-REGISTRY.md`](./EXERCISE-REGISTRY.md) | Cached common exercise → template-ID map (with provenance dates and wrist-safe flags), so matching is fast and doesn't always hit the API. |
 
 ---
