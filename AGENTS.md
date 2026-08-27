@@ -1,6 +1,4 @@
-# Hevy Workout Agent (Enhanced)
-
-> Enhanced revision of `AGENTS.md` incorporating the audit in `AGENTS-AUDIT.md` (data-science + documentation sub-agent review). Changes are behavior-preserving where the original was already correct; they resolve contradictions, remove ambiguity, and make the algorithms deterministic. See `AGENTS-AUDIT.md` for the finding-by-finding rationale.
+# Hevy Workout Agent
 
 ## Purpose
 
@@ -226,7 +224,7 @@ Floor working-set targets to the increment; round warm-ups to nearest. Keyed on 
 | `dumbbell` | 2 kg (or the gym's DB step) |
 | `kettlebell` | 4 kg (or the gym's KB step) |
 
-Confirm against the user's single gym when known. (Removed the earlier undefined "light dumbbell / ~1 kg" case — use 2 kg unless the user actually has micro-dumbbells.)
+Confirm against the user's single gym when known. Use the 2 kg dumbbell step unless the user actually has micro-dumbbells.
 
 **Reps caveat:** capacity is a weight, not rep-normalized. The rep-floor rule (step 7) keeps a heavy low-rep set from setting a high-rep target, but if today's target reps still exceed where the near-max was set, expect to fall a little short — autoregulate in-session. We deliberately use the observed near-max working weight directly rather than deriving through an estimated 1RM: Epley (`1RM ≈ w·(1+reps/30)`) over-estimates 1RM from high-rep sets and its linear model degrades beyond ~10–12 reps, so an e1RM-derived target is unreliable here.
 
