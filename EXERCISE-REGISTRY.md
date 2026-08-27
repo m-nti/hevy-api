@@ -58,6 +58,7 @@ This registry is a cache, not the source of truth. The API is authoritative; whe
 | Pendlay Row (Barbell) | `018ADC12` | weight_reps |
 | T Bar Row | `08A2974E` | weight_reps |
 | Chest Supported T Bar Row | `6A8D3193` | weight_reps |
+| Chest Supported Incline Row (Dumbbell) | `914F3A96` | weight_reps |
 | Iso-Lateral Row (Machine) | `AA1EB7D8` | weight_reps |
 | Iso-Lateral Low Row | `91FAFBA3` | weight_reps |
 | Iso-Lateral High Row (Machine) | `BC3492DA` | weight_reps |
@@ -98,6 +99,21 @@ This registry is a cache, not the source of truth. The API is authoritative; whe
 | Rear Delt Reverse Fly (Dumbbell) | `E5988A0A` | weight_reps |
 | Rear Delt Reverse Fly (Machine) | `D8281C62` | weight_reps |
 | Band Pullaparts | `E8D86EE8` | reps_only |
+
+## Traps
+
+Verified live from `GET /v1/exercise_templates` on **2026-08-27**.
+
+| Exercise | ID | Type |
+|----------|----|------|
+| Shrug (Barbell) | `0B841777` | weight_reps |
+| Shrug (Dumbbell) | `ABEC557F` | weight_reps |
+| Shrug (Cable) | `FFABC123` | weight_reps |
+| Shrug (Machine) | `19A38071` | weight_reps |
+| Shrug (Smith Machine) | `742E5BD5` | weight_reps |
+
+> `Face Pull` (`BE640BA0`) is filed under **Back** above but is a primary trap/rear-delt
+> movement too — look there rather than adding a second entry.
 
 ## Biceps
 
